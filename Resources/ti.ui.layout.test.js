@@ -1555,7 +1555,7 @@ describe('Titanium.UI.Layout', function () {
 	// when both left & right are specified to parent
 	//
 	// FIXME Get working on iOS and Android. We can't rely on rect/size being valid in focus event!
-	((utilities.isIOS() || utilities.isAndroid()) ? it.skip : it)('TIMOB-23372 #2', function (finish) {
+	((utilities.isIOS() || utilities.isAndroid() || utilities.isWindows10()) ? it.skip : it)('TIMOB-23372 #2', function (finish) {
 		var view = Ti.UI.createView({
 			backgroundColor: 'orange',
 			layout: 'vertical',
@@ -1602,7 +1602,7 @@ describe('Titanium.UI.Layout', function () {
 	// when both left & right are specified to parent
 	//
 	// FIXME Get working on iOS and Android. We can't rely on rect/size being valid in focus event!
-	((utilities.isIOS() || utilities.isAndroid()) ? it.skip : it)('TIMOB-23372 #3', function (finish) {
+	((utilities.isIOS() || utilities.isAndroid() || utilities.isWindows10()) ? it.skip : it)('TIMOB-23372 #3', function (finish) {
 		var view = Ti.UI.createView({
 			backgroundColor: 'yellow',
 			layout: 'composite',
@@ -1650,7 +1650,7 @@ describe('Titanium.UI.Layout', function () {
 	// when both left & right are specified to parent
 	//
 	// FIXME Get working on iOS and Android. We can't rely on rect/size being valid in focus event!
-	((utilities.isIOS() || utilities.isAndroid()) ? it.skip : it)('TIMOB-23372 #4', function (finish) {
+	((utilities.isIOS() || utilities.isAndroid()  || utilities.isWindows10()) ? it.skip : it)('TIMOB-23372 #4', function (finish) {
 		var view = Ti.UI.createView({
 			backgroundColor: 'yellow',
 			layout: 'horizontal',
@@ -1844,7 +1844,7 @@ describe('Titanium.UI.Layout', function () {
 	// left & right should just work for child view when parent is Window (composite)
 	//
 	// FIXME Get working on iOS and Android. We can't rely on rect/size being valid in focus event!
-	((utilities.isIOS() || utilities.isAndroid()) ? it.skip : it)('TIMOB-23372 #8', function (finish) {
+	((utilities.isIOS() || utilities.isAndroid()  || utilities.isWindows10()) ? it.skip : it)('TIMOB-23372 #8', function (finish) {
 		var label = Ti.UI.createLabel({
 			left: 10,
 			right: 10,
@@ -1878,7 +1878,7 @@ describe('Titanium.UI.Layout', function () {
 	// left & right should just work for child view when parent is Window (horizontal)
 	//
 	// FIXME Get working on iOS and Android. We can't rely on rect/size being valid in focus event!
-	((utilities.isIOS() || utilities.isAndroid()) ? it.skip : it)('TIMOB-23372 #9', function (finish) {
+	((utilities.isIOS() || utilities.isAndroid()  || utilities.isWindows10()) ? it.skip : it)('TIMOB-23372 #9', function (finish) {
 		var label = Ti.UI.createLabel({
 			left: 10,
 			right: 10,
@@ -1912,7 +1912,7 @@ describe('Titanium.UI.Layout', function () {
 	// left & right should just work for child view when parent is Window (vertical)
 	//
 	// FIXME Get working on iOS and Android. We can't rely on rect/size being valid in focus event!
-	((utilities.isIOS() || utilities.isAndroid()) ? it.skip : it)('TIMOB-23372 #10', function (finish) {
+	((utilities.isIOS() || utilities.isAndroid() || utilities.isWindows10()) ? it.skip : it)('TIMOB-23372 #10', function (finish) {
 		var label = Ti.UI.createLabel({
 			left: 10,
 			right: 10,
@@ -1991,5 +1991,47 @@ describe('Titanium.UI.Layout', function () {
 		});
 		win.add(label);
 		win.open();
+	});
+
+	// TIMOB-23225
+	it('TIMOB-23225', function (finish) {
+			var parent = Ti.UI.createView({
+					height: Ti.UI.SIZE,
+					width: Ti.UI.SIZE,
+					backgroundColor: 'orange'
+			});
+
+			var v1 = Ti.UI.createView({
+					height: 100, width: Ti.UI.FILL,
+					backgroundColor: 'gray',
+			});
+			var v2 = Ti.UI.createImageView({
+					height: 50, width: 50,
+					top: 0, right: 0,
+					backgroundColor: 'red',
+			});
+			var win = createWindow({}, finish);
+			win.addEventListener('open', function () {
+					setTimeout(function () {
+						var err;
+						try {
+							should(v1.rect.x).eql(0);
+							should(v1.rect.y).eql(0);
+							should(v1.rect.width).eql(parent.rect.width);
+							should(v1.rect.height).eql(parent.rect.height);
+							should(v2.rect.x).eql(parent.rect.width - v2.rect.width);
+							should(v2.rect.y).eql(0);
+							should(v2.rect.width).eql(50);
+							should(v2.rect.width).eql(50);
+						} catch (e) {
+							err = e;
+						}
+						finish(err);
+					}, 2000);
+			});
+			parent.add(v1);
+			parent.add(v2);
+			win.add(parent);
+			win.open();
 	});
 });

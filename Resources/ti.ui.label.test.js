@@ -90,7 +90,7 @@ describe('Titanium.UI.Label', function () {
 		label.textAlign = Titanium.UI.TEXT_ALIGNMENT_RIGHT;
 		should(label.textAlign).eql(Titanium.UI.TEXT_ALIGNMENT_RIGHT);
 		should(label.getTextAlign()).eql(Titanium.UI.TEXT_ALIGNMENT_RIGHT);
-		
+
 		// TIMOB-3408
 		if (utilities.isIOS()) {
 			label.textAlign = Ti.UI.TEXT_ALIGNMENT_JUSTIFY;
@@ -212,6 +212,27 @@ describe('Titanium.UI.Label', function () {
 				finish(err);
 			}
 		});
+		win.open();
+	});
+
+	(utilities.isWindows10() ? it.skip : it)('border (without width/height)', function (finish) {
+		this.timeout(3000);
+		var win = Ti.UI.createWindow(),
+			label = Ti.UI.createLabel({
+				borderWidth: 5,
+				borderColor: 'yellow',
+				borderRadius: 5,
+				text: 'this is some text'
+			});
+		win.addEventListener('open', function () {
+			setTimeout(function () {
+				should(label.size.width).be.greaterThan(0);
+				should(label.size.height).be.greaterThan(0);
+				win.close();
+				finish();
+			}, 1000);
+		});
+		win.add(label);
 		win.open();
 	});
 

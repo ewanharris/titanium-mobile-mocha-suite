@@ -280,7 +280,7 @@ describe('Titanium.UI.ImageView', function () {
 	// TIMOB-18684
 	// FIXME Get working on iOS. Times out. never fires postlayout?
 	// FIXME Tiems out on Android build agent. likely postlayout never fires
-	((utilities.isIOS() || utilities.isAndroid()) ? it.skip : it)('layoutWithSIZE_and_fixed', function (finish) {
+	(((utilities.isWindows() && !utilities.isWindows10()) || utilities.isIOS() || utilities.isAndroid()) ? it.skip : it)('layoutWithSIZE_and_fixed', function (finish) {
 		this.slow(1000);
 		this.timeout(10000);
 

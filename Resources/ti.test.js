@@ -17,7 +17,7 @@ describe('Titanium', function () {
 	});
 
 	// FIXME Get working on IOS!
-	(utilities.isIOS() ? it.skip : it)('version', function () {
+	(utilities.isIOS() || utilities.isWindows() ? it.skip : it)('version', function () {
 		should(Ti.version).not.eql('__TITANIUM_VERSION__');
 		should(Ti).have.readOnlyProperty('version').which.is.a.String;
 	});

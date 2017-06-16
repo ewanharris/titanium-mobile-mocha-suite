@@ -15,76 +15,76 @@ describe('Titanium.Platform.DisplayCaps', function () {
 	});
 
 	// FIXME Get working on IOS // on iOS property is configurable
-	(utilities.isIOS() ? it.skip : it)('density', function () {
+	(utilities.isIOS() || utilities.isWindows() ? it.skip : it)('density', function () {
 		should(Ti.Platform.displayCaps).have.readOnlyProperty('density').which.is.a.String;
 		// TODO Test for known range of values?
 		// Android: "high", "medium", "xhigh", "xxhigh", "xxxhigh", "low", "medium"
 		// iOS: "xhigh", "high", "medium"
 	});
 
-	it('getDensity()', function () {
+	(utilities.isWindows() ? it.skip : it)('getDensity()', function () {
 		should(Ti.Platform.displayCaps.getDensity).be.a.Function;
 		should(Ti.Platform.displayCaps.getDensity()).be.a.String;
 	});
 
 	// FIXME Get working on IOS
-	(utilities.isIOS() ? it.skip : it)('dpi', function () {
+	(utilities.isIOS() || utilities.isWindows() ? it.skip : it)('dpi', function () {
 		should(Ti.Platform.displayCaps).have.readOnlyProperty('dpi').which.is.a.Number;
 		should(Ti.Platform.displayCaps.dpi).be.above(0);
 	});
 
-	it('getDpi()', function () {
+	(utilities.isWindows() ? it.skip : it)it('getDpi()', function () {
 		should(Ti.Platform.displayCaps.getDpi).be.a.Function;
 		should(Ti.Platform.displayCaps.getDpi()).be.a.Number;
 	});
 
 	// FIXME Get working on IOS
-	(utilities.isIOS() ? it.skip : it)('logicalDensityFactor', function () {
+	(utilities.isIOS() || utilities.isWindows() ? it.skip : it)('logicalDensityFactor', function () {
 		should(Ti.Platform.displayCaps).have.readOnlyProperty('logicalDensityFactor').which.is.a.Number;
 		should(Ti.Platform.displayCaps.logicalDensityFactor).be.above(0);
 	});
 
-	it('getLogicalDensityFactor()', function () {
+	(utilities.isWindows() ? it.skip : it)('getLogicalDensityFactor()', function () {
 		should(Ti.Platform.displayCaps.getLogicalDensityFactor).be.a.Function;
 		should(Ti.Platform.displayCaps.getLogicalDensityFactor()).be.a.Number;
 	});
 
-	it('platformHeight', function () {
+	(utilities.isWindows() ? it.skip : it)('platformHeight', function () {
 		should(Ti.Platform.displayCaps.platformHeight).be.a.Number;
 		should(Ti.Platform.displayCaps.platformHeight).be.above(0);
 	});
 
-	it('getPlatformHeight()', function () {
+	(utilities.isWindows() ? it.skip : it)('getPlatformHeight()', function () {
 		should(Ti.Platform.displayCaps.getPlatformHeight).be.a.Function;
 		should(Ti.Platform.displayCaps.getPlatformHeight()).be.a.Number;
 	});
 
-	it('platformWidth', function () {
+	(utilities.isWindows() ? it.skip : it)('platformWidth', function () {
 		should(Ti.Platform.displayCaps.platformWidth).be.a.Number;
 		should(Ti.Platform.displayCaps.platformWidth).be.above(0);
 	});
 
-	it('getPlatformWidth()', function () {
+	(utilities.isWindows() ? it.skip : it)('getPlatformWidth()', function () {
 		should(Ti.Platform.displayCaps.getPlatformWidth).be.a.Function;
 		should(Ti.Platform.displayCaps.getPlatformWidth()).be.a.Number;
 	});
 
-	(utilities.isIOS() ? it.skip : it)('xdpi', function () {
+	(utilities.isIOS() || utilities.isWindows() ? it.skip : it)('xdpi', function () {
 		should(Ti.Platform.displayCaps).have.readOnlyProperty('xdpi').which.is.a.Number;
 		should(Ti.Platform.displayCaps.xdpi).be.above(0);
 	});
 
-	(utilities.isIOS() ? it.skip : it)('getXdpi()', function () {
+	(utilities.isIOS() || utilities.isWindows() ? it.skip : it)('getXdpi()', function () {
 		should(Ti.Platform.displayCaps.getXdpi).be.a.Function;
 		should(Ti.Platform.displayCaps.getXdpi()).be.a.Number;
 	});
 
-	(utilities.isIOS() ? it.skip : it)('ydpi', function () {
+	(utilities.isIOS() || utilities.isWindows() ? it.skip : it)('ydpi', function () {
 		should(Ti.Platform.displayCaps).have.readOnlyProperty('ydpi').which.is.a.Number;
 		should(Ti.Platform.displayCaps.ydpi).be.above(0);
 	});
 
-	(utilities.isIOS() ? it.skip : it)('getYdpi()', function () {
+	(utilities.isIOS() || utilities.isWindows() ? it.skip : it)('getYdpi()', function () {
 		should(Ti.Platform.displayCaps.getYdpi).be.a.Function;
 		should(Ti.Platform.displayCaps.getYdpi()).be.a.Number;
 	});

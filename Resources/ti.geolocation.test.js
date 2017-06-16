@@ -84,8 +84,8 @@ describe('Titanium.Geolocation', function () {
 		should(Ti.Geolocation.getLocationServicesEnabled).be.a.Function;
 		should(Ti.Geolocation.getLocationServicesEnabled()).be.a.Boolean;
 	});
-
-	it('forwardGeocoder', function (finish) {
+	// skip it for now, it may be blocking other tests due to permission dialog
+	(utilities.isWindows() ? it.skip : it)('forwardGeocoder', function (finish) {
 		this.timeout(6e4); // 60 sec
 
 		should(Ti.Geolocation.forwardGeocoder).be.a.Function;
@@ -104,8 +104,9 @@ describe('Titanium.Geolocation', function () {
 		});
 	});
 
+	// skip it for now, it may be blocking other tests due to permission dialog
 	// FIXME The address object is different from platform to platform! https://jira.appcelerator.org/browse/TIMOB-23496
-	it('reverseGeocoder', function (finish) {
+	(utilities.isWindows() ? it.skip : it)it('reverseGeocoder', function (finish) {
 		this.timeout(6e4); // 60 sec
 
 		should(Ti.Geolocation.reverseGeocoder).be.a.Function;

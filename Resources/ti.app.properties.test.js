@@ -75,9 +75,9 @@ describe('Titanium.App.Properties', function () {
 		var test_list = ['item1', 'item2', 'item3'];
 		Ti.App.Properties.setList('test_list', test_list);
 		should(Ti.App.Properties.getList('test_list')).be.eql(test_list);
-		
-		var names = [{name: "One"}, {name: 1}, {name: ""}, null, {name: true}, 1, "", null, false];
-		Ti.App.Properties.setList("names", names);
+
+		var names = [{name: 'One'}, {name: 1}, {name: ''}, null, {name: true}, 1, '', null, false];
+		Ti.App.Properties.setList('names', names);
 		should(JSON.stringify(Ti.App.Properties.getList('names'))).be.eql(JSON.stringify(names));
 	});
 
@@ -218,4 +218,13 @@ describe('Titanium.App.Properties', function () {
 		should(Ti.App.Properties.hasProperty('char4096')).be.false;
 	});
 
+	it('removeAllProperties should remove all properties', function () {
+		Ti.App.Properties.setString('test_removeAllProperties1', 'test1');
+		Ti.App.Properties.setString('test_removeAllProperties2', 'test2');
+		should(Ti.App.Properties.hasProperty('test_removeAllProperties1')).be.true;
+		should(Ti.App.Properties.hasProperty('test_removeAllProperties2')).be.true;
+		Ti.App.Properties.removeAllProperties();
+		should(Ti.App.Properties.hasProperty('test_removeAllProperties1')).be.false;
+		should(Ti.App.Properties.hasProperty('test_removeAllProperties2')).be.false;
+	});
 });

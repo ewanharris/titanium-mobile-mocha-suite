@@ -47,6 +47,7 @@ describe('Titanium.Contacts', function() {
 		should(Ti.Contacts).have.constant('CONTACTS_SORT_LAST_NAME').which.is.a.Number;
 	});
 
+	// TODO: This should be hasContactsPermissions?
 	it('contactsAuthorization', function () {
 		should(function () {
 			should(Ti.Contacts.contactsAuthorization).not.be.undefined;
@@ -204,8 +205,8 @@ describe('Titanium.Contacts', function() {
 		// We exercise removal in Person add/remove
 	});
 
-	it('requestAuthorization()', function() {
-		should(Ti.Contacts.requestAuthorization).be.a.Function;
+	it('requestContactsPermissions()', function() {
+		should(Ti.Contacts.requestContactsPermissions).be.a.Function;
 		// TODO Test the method
 	});
 

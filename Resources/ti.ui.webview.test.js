@@ -204,4 +204,80 @@ describe('Titanium.UI.WebView', function () {
 		win.open();
 	});
 
+	(utilities.isWindows() ? it : it.skip)('url (ms-appx)', function (finish) {
+	    this.timeout(10000);
+	    var w = Ti.UI.createWindow({
+	        backgroundColor: 'blue'
+	    });
+	    var webview = Ti.UI.createWebView();
+
+	    webview.addEventListener('load', function () {
+	        w.close();
+	        finish();
+	    });
+	    w.addEventListener('open', function () {
+	        should(function () {
+	            webview.url = 'ms-appx:///ti.ui.webview.test.html';
+	        }).not.throw();
+	    });
+
+	    w.add(webview);
+	    w.open();
+	});
+
+	(utilities.isWindows() ? it : it.skip)('url (ms-appx-web)', function (finish) {
+	    this.timeout(10000);
+	    var w = Ti.UI.createWindow({
+	        backgroundColor: 'blue'
+	    });
+	    var webview = Ti.UI.createWebView();
+
+	    webview.addEventListener('load', function () {
+	        w.close();
+	        finish();
+	    });
+	    w.addEventListener('open', function () {
+	        should(function () {
+	            webview.url = 'ms-appx-web:///ti.ui.webview.test.html';
+	        }).not.throw();
+	    });
+
+	    w.add(webview);
+	    w.open();
+	});
+
+	(utilities.isWindows() ? it : it.skip)('url (ms-appx-data)', function (finish) {
+	    this.timeout(10000);
+	    function prepare(files) {
+	        var webroot = Ti.Filesystem.applicationDataDirectory + 'webroot';
+	        var webroot_file = Ti.Filesystem.getFile(webroot);
+	        if (!webroot_file.exists()) {
+	            webroot_file.createDirectory();
+	        }
+	        for (var i = 0; i < files.length; i++) {
+	            var file = files[i];
+	            var from = Ti.Filesystem.getFile(Ti.Filesystem.resourcesDirectory, file);
+	            var to = webroot + Ti.Filesystem.separator + file;
+	            from.copy(to)
+	        }
+	    }
+	    var w = Ti.UI.createWindow({
+	        backgroundColor: 'blue'
+	    });
+	    var webview = Ti.UI.createWebView();
+	    webview.addEventListener('load', function () {
+	        w.close();
+	        finish();
+	    });
+	    w.addEventListener('open', function () {
+	        prepare(['ti.ui.webview.test.html'])
+	        should(function () {
+	            webview.url = 'ms-appdata:///local/webroot/ti.ui.webview.test.html';
+	        }).not.throw();
+	    });
+
+	    w.add(webview);
+	    w.open();
+	});
+
 });
