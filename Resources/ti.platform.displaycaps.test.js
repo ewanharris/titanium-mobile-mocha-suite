@@ -33,7 +33,7 @@ describe('Titanium.Platform.DisplayCaps', function () {
 		should(Ti.Platform.displayCaps.dpi).be.above(0);
 	});
 
-	(utilities.isWindows() ? it.skip : it)it('getDpi()', function () {
+	(utilities.isWindows() ? it.skip : it)('getDpi()', function () {
 		should(Ti.Platform.displayCaps.getDpi).be.a.Function;
 		should(Ti.Platform.displayCaps.getDpi()).be.a.Number;
 	});

@@ -24,6 +24,7 @@ require('./es6.spread.args.test');
 require('./es6.string.interpolation.test');
 // Titanium APIs
 require('./ti.accelerometer.test');
+require('./ti.analytics.test');
 require('./ti.api.test');
 require('./ti.app.test');
 require('./ti.app.properties.test');
@@ -48,6 +49,8 @@ require('./ti.media.audioplayer.test');
 require('./ti.media.sound.test');
 require('./ti.network.test');
 require('./ti.network.cookie.test');
+require('./ti.network.socket.tcp.test');
+require('./ti.network.socket.udp.test');
 require('./ti.network.httpclient.test');
 require('./ti.platform.test');
 require('./ti.platform.displaycaps.test');

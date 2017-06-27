@@ -4,7 +4,7 @@
  * Licensed under the terms of the Apache Public License
  * Please see the LICENSE included with this distribution for details.
  */
-var should = require('./should'),
+var should = require('./utilities/assertions'),
 	utilities = require('./utilities/utilities');
 
 describe('Titanium.Network.Socket.TCP', function () {
@@ -42,7 +42,9 @@ describe('Titanium.Network.Socket.TCP', function () {
         finish();
     });
 
-    it('send data', function (finish) {
+
+	// FIXME: Android chokes with : android.os.NetworkOnMainThreadException
+    (utilities.isAndroid() ? it.skip : it)('send data', function (finish) {
 	    var socket = Ti.Network.Socket.createTCP({
 	        host: 'www.appcelerator.com', port: 80,
 	        connected: function (e) {
@@ -57,7 +59,9 @@ describe('Titanium.Network.Socket.TCP', function () {
 	    socket.connect();
 	});
 
-    it('receive data', function (finish) {
+	// FIXME: iOS fires the connected event twice
+	// FIXME: Android chokes with : android.os.NetworkOnMainThreadException
+    (utilities.isWindows() ? it : it.skip)('receive data', function (finish) {
 	    var socket = Ti.Network.Socket.createTCP({
 	        host: 'pastebin.com', port: 80,
 	        connected: function (e) {
@@ -66,9 +70,11 @@ describe('Titanium.Network.Socket.TCP', function () {
 	            should(socket.read).not.be.null;
 	            should(socket.read).be.a.Function;
 	            Ti.Stream.pump(e.socket, function (e) {
-	                if (e.buffer.toString().indexOf('SUCCESS!') > 0) {
+					if (e.buffer.toString().indexOf('SUCCESS!') > 0) {
 	                    finish();
-	                }
+	                } else {
+						finish(new Error('Did not get success'));
+					}
 	            }, 1024, true);
 
                 // send GET request

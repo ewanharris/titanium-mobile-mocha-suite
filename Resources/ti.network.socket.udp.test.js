@@ -4,10 +4,10 @@
  * Licensed under the terms of the Apache Public License
  * Please see the LICENSE included with this distribution for details.
  */
-var should = require('./should'),
+var should = require('./utilities/assertions'),
 	utilities = require('./utilities/utilities');
 
-describe('Titanium.Network.Socket.UDP', function () {
+(utilities.isWindows() ? describe : describe.skip )('Titanium.Network.Socket.UDP', function () {
 
     it('start', function (finish) {
         this.timeout(6e4);

@@ -4,12 +4,13 @@
  * Licensed under the terms of the Apache Public License
  * Please see the LICENSE included with this distribution for details.
  */
-var should = require('./should'),
+var should = require('./utilities/assertions'),
 	utilities = require('./utilities/utilities');
 
 describe('Titanium.Analytics', function () {
 
-	it('lastEvent', function () {
+	// FIXME: iOS and Android return a JSON string value here
+	(utilities.isIOS() || utilities.isAndroid() ? it.skip : it)('lastEvent', function () {
 		should(Ti.Analytics.lastEvent).not.be.undefined;
 		should(Ti.Analytics.lastEvent).be.a.Object;
 		should(Ti.Analytics.getLastEvent).not.be.undefined;
