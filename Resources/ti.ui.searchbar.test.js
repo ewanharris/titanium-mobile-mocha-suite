@@ -42,18 +42,19 @@ describe('Titanium.UI.SearchBar', function () {
 
 	// FIXME this seems to hard-crash Android. No stacktrace, no errors from logcat. File a JIRA?
 	(utilities.isAndroid() ? it.skip : it)('ListView', function (finish) {
-		var win = Ti.UI.createWindow(),
-			sb = Ti.UI.createSearchBar({
-				barColor: 'blue',
-				height: 44
-			}),
-			listview = Ti.UI.createListView({
-				height: 600,
-				width: '100%',
-				top: 75,
-				left: 0
-			});
-
+		var win = Ti.UI.createWindow();
+		var sb = Titanium.UI.createSearchBar({
+			barColor: 'blue',
+			height: 44
+		});
+		var listview = Ti.UI.createListView({
+			height: 600,
+			width: '100%',
+			top: 75,
+			left: 0
+		});
+		var fruitSection = Ti.UI.createListSection({ headerTitle: 'Fruits ' });
+		listview.sections = [fruitSection];
 		win.addEventListener('open', function () {
 			var error;
 

@@ -149,8 +149,7 @@ describe('Titanium.UI.Label', function () {
 	});
 
 	// FIXME Can't rely on Ti.UI.Window.postlayout event firing because neither platform fires it for that type (only maybe bubbles up from label)
-	(((utilities.isWindows8_1() && utilities.isWindowsDesktop()) ||
-	(utilities.isAndroid() || utilities.isIOS())) ? it.skip : it)('width', function (finish) {
+	((utilities.isAndroid() || utilities.isIOS()) ? it.skip : it)('width', function (finish) {
 		this.slow(1000);
 		this.timeout(10000);
 
@@ -215,7 +214,7 @@ describe('Titanium.UI.Label', function () {
 		win.open();
 	});
 
-	(utilities.isWindows10() ? it.skip : it)('border (without width/height)', function (finish) {
+	it('border (without width/height)', function (finish) {
 		this.timeout(3000);
 		var win = Ti.UI.createWindow(),
 			label = Ti.UI.createLabel({
@@ -235,5 +234,4 @@ describe('Titanium.UI.Label', function () {
 		win.add(label);
 		win.open();
 	});
-
 });

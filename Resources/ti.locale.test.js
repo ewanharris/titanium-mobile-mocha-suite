@@ -82,7 +82,7 @@ describe('Titanium.Locale', function () {
 		should(Ti.Locale.currentLocale).eql('en-US');
 	});
 
-	it.skip('Ti.Locale.getString_format', function () {
+	it('Ti.Locale.getString_format', function () {
 		var i18nMissingMsg = '<no translation available>';
 		var string1 = 'You say ' + Ti.Locale.getString('signoff', i18nMissingMsg) + ' and I say ' + Ti.Locale.getString('greeting', i18nMissingMsg) + '!';
 		var string2 = String.format(L('phrase'), L('greeting', i18nMissingMsg), L('signoff', i18nMissingMsg));
@@ -108,7 +108,7 @@ describe('Titanium.Locale', function () {
 		should(Ti.Locale.currentLanguage).eql('fr');
 	});
 
-	it.skip('Ti.Locale.getString with default value', function (finish) {
+	it('Ti.Locale.getString with default value', function (finish) {
 	    Ti.Locale.setLanguage('en-US');
 	    should(Ti.Locale.getString('this is my key')).eql('this is my value');
         // if value is not found, it should return key itself
@@ -120,7 +120,7 @@ describe('Titanium.Locale', function () {
 	    finish();
 	});
 
-	it.skip('Ti.Locale.getString with Language', function (finish) {
+	it('Ti.Locale.getString with Language', function (finish) {
 	    Ti.Locale.setLanguage('en-US');
 	    should(Ti.Locale.getString('this is my key')).eql('this is my value');
 	    Ti.Locale.setLanguage('en-GB');

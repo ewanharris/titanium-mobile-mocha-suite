@@ -55,7 +55,7 @@ describe('Titanium.UI.WebView', function () {
 		win.open();
 	});
 
-	((utilities.isWindows10() && utilities.isWindowsDesktop()) ? it.skip : it)('url', function (finish) {
+	it('url', function (finish) {
 		win = Ti.UI.createWindow({
 			backgroundColor: 'blue'
 		});
@@ -153,11 +153,11 @@ describe('Titanium.UI.WebView', function () {
 		win.open();
 	});
 
-	// Skip this on desktop Windows apps because it crashes the app now.
+	// Skip this on desktop Windows apps because it crashes the app now. - Works fine locally, to investigate EH
 	// FIXME Parity issue! Windows require second argument which is callback function. Other platforms return value sync!
 	// FIXME Android returns null?
 	// FIXME Sometimes times out on iOS. Not really sure why...
-	(((utilities.isWindows10() && utilities.isWindowsDesktop()) || utilities.isAndroid() || utilities.isIOS()) ? it.skip : it)('evalJS', function (finish) {
+	((utilities.isAndroid() || utilities.isIOS()) ? it.skip : it)('evalJS', function (finish) {
 		win = Ti.UI.createWindow({
 			backgroundColor: 'blue'
 		});

@@ -137,8 +137,8 @@ describe('Titanium.UI.ImageView', function () {
 
 		imageView.image = 'ms-appdata:///local/TIMOB-20609.png';
 	});
-
-	(utilities.isWindows() ? it : it.skip)('image (File)', function (finish) {
+	//TIMOB-24985
+	(utilities.isWindows() ? it.skip : it)('image (File)', function (finish) {
 		var fromFile = Ti.Filesystem.getFile(Ti.Filesystem.resourcesDirectory, 'Logo.png');
 
 		var imageView = Ti.UI.createImageView();
@@ -154,8 +154,8 @@ describe('Titanium.UI.ImageView', function () {
 
 		imageView.image = fromFile;
 	});
-
-	(utilities.isWindows() ? it : it.skip)('image (Blob)', function (finish) {
+	//TIMOB-24985
+	(utilities.isWindows() ? it.skip : it)('image (Blob)', function (finish) {
 		var fromFile = Ti.Filesystem.getFile(Ti.Filesystem.resourcesDirectory, 'Logo.png'),
 			blob = fromFile.read();
 		var imageView = Ti.UI.createImageView();
@@ -172,7 +172,7 @@ describe('Titanium.UI.ImageView', function () {
 		imageView.image = blob;
 	});
 
-	(utilities.isWindows() ? it : it.skip)('images', function (finish) {
+	it('images', function (finish) {
 		this.timeout(6e4);
 
 		win = Ti.UI.createWindow();
@@ -280,7 +280,7 @@ describe('Titanium.UI.ImageView', function () {
 	// TIMOB-18684
 	// FIXME Get working on iOS. Times out. never fires postlayout?
 	// FIXME Tiems out on Android build agent. likely postlayout never fires
-	(((utilities.isWindows() && !utilities.isWindows10()) || utilities.isIOS() || utilities.isAndroid()) ? it.skip : it)('layoutWithSIZE_and_fixed', function (finish) {
+	((utilities.isIOS() || utilities.isAndroid()) ? it.skip : it)('layoutWithSIZE_and_fixed', function (finish) {
 		this.slow(1000);
 		this.timeout(10000);
 

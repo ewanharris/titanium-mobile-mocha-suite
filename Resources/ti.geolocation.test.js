@@ -7,7 +7,9 @@
 var should = require('./utilities/assertions'),
 	utilities = require('./utilities/utilities');
 
-describe('Titanium.Geolocation', function () {
+// Skip on Windows 10 Mobile device family due to prompt,
+// however we might be able to run some tests?
+(utilities.isWindowsEmulator() ? describe.skip : describe)('Titanium.Geolocation', function () {
 	it('apiName', function () {
 		should(Ti.Geolocation).have.readOnlyProperty('apiName').which.is.a.String;
 		should(Ti.Geolocation.apiName).be.eql('Ti.Geolocation');
@@ -84,8 +86,9 @@ describe('Titanium.Geolocation', function () {
 		should(Ti.Geolocation.getLocationServicesEnabled).be.a.Function;
 		should(Ti.Geolocation.getLocationServicesEnabled()).be.a.Boolean;
 	});
-	// skip it for now, it may be blocking other tests due to permission dialog
-	(utilities.isWindows() ? it.skip : it)('forwardGeocoder', function (finish) {
+
+
+	it('forwardGeocoder', function (finish) {
 		this.timeout(6e4); // 60 sec
 
 		should(Ti.Geolocation.forwardGeocoder).be.a.Function;
@@ -104,9 +107,8 @@ describe('Titanium.Geolocation', function () {
 		});
 	});
 
-	// skip it for now, it may be blocking other tests due to permission dialog
 	// FIXME The address object is different from platform to platform! https://jira.appcelerator.org/browse/TIMOB-23496
-	(utilities.isWindows() ? it.skip : it)('reverseGeocoder', function (finish) {
+	it('reverseGeocoder', function (finish) {
 		this.timeout(6e4); // 60 sec
 
 		should(Ti.Geolocation.reverseGeocoder).be.a.Function;

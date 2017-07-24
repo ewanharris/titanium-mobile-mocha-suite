@@ -22,8 +22,8 @@ describe('Titanium.Analytics', function () {
 	    should(Ti.Analytics.featureEvent).be.a.Function;
 	});
 
-    // TODO: implement Titanium.Analytics.filterEvents
-	it.skip('filterEvents', function () {
+    // TODO: implement Titanium.Analytics.filterEvents on Windows?
+	(utilities.isWindows() ? it.skip : it)('filterEvents', function () {
 	    should(Ti.Analytics.filterEvents).not.be.undefined;
 	    should(Ti.Analytics.filterEvents).be.a.Function;
 	});

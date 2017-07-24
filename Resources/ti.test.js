@@ -6,8 +6,7 @@
  */
 
 var should = require('./utilities/assertions'),
-	utilities = require('./utilities/utilities'),
-	assert = require('./utilities/assertions');
+	utilities = require('./utilities/utilities');
 
 describe('Titanium', function () {
 
@@ -17,7 +16,7 @@ describe('Titanium', function () {
 	});
 
 	// FIXME Get working on IOS!
-	(utilities.isIOS() || utilities.isWindows() ? it.skip : it)('version', function () {
+	(utilities.isIOS() ? it.skip : it)('version', function () {
 		should(Ti.version).not.eql('__TITANIUM_VERSION__');
 		should(Ti).have.readOnlyProperty('version').which.is.a.String;
 	});

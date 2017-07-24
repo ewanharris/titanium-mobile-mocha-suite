@@ -71,6 +71,14 @@ describe('Titanium.App.Properties', function () {
 		should(Ti.App.Properties.getInt('presetInt')).be.eql(1337);
 	});
 
+	it('List default to null', function () {
+	    should(Ti.App.Properties.getList('test_list_null', null)).be.eql(null);
+	});
+
+	it('Object default to null', function () {
+	    should(Ti.App.Properties.getObject('test_object_null')).be.eql(null);
+	});
+
 	it('List', function () {
 		var test_list = ['item1', 'item2', 'item3'];
 		Ti.App.Properties.setList('test_list', test_list);
@@ -86,6 +94,10 @@ describe('Titanium.App.Properties', function () {
 		Ti.App.Properties.setObject('test_object', test_object);
 		should(Ti.App.Properties.getObject('test_object')).be.eql(test_object);
 	});
+
+	it('Object default to null', function () {
+        should(Ti.App.Properties.getObject('test_object_null')).be.eql(null);
+    });
 
 	it('getString default', function () {
 		Ti.App.Properties.removeProperty('test_string');
