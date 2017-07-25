@@ -1554,7 +1554,7 @@ describe('Titanium.UI.Layout', function () {
 	// when both left & right are specified to parent
 	//
 	// FIXME Get working on iOS and Android. We can't rely on rect/size being valid in focus event!
-	((utilities.isIOS() || utilities.isAndroid()) ? it.skip : it)('TIMOB-23372 #2', function (finish) {
+	((utilities.isWindows() || utilities.isIOS() || utilities.isAndroid()) ? it.skip : it)('TIMOB-23372 #2', function (finish) {
 		var view = Ti.UI.createView({
 			backgroundColor: 'orange',
 			layout: 'vertical',
@@ -1601,7 +1601,7 @@ describe('Titanium.UI.Layout', function () {
 	// when both left & right are specified to parent
 	//
 	// FIXME Get working on iOS and Android. We can't rely on rect/size being valid in focus event!
-	((utilities.isIOS() || utilities.isAndroid()) ? it.skip : it.only)('TIMOB-23372 #3', function (finish) {
+	((utilities.isWindows() || utilities.isIOS() || utilities.isAndroid()) ? it.skip : it)('TIMOB-23372 #3', function (finish) {
 		var view = Ti.UI.createView({
 			backgroundColor: 'yellow',
 			layout: 'composite',
@@ -1649,7 +1649,7 @@ describe('Titanium.UI.Layout', function () {
 	// when both left & right are specified to parent
 	//
 	// FIXME Get working on iOS and Android. We can't rely on rect/size being valid in focus event!
-	((utilities.isIOS() || utilities.isAndroid()) ? it.skip : it)('TIMOB-23372 #4', function (finish) {
+	((utilities.isWindows() || utilities.isIOS() || utilities.isAndroid()) ? it.skip : it)('TIMOB-23372 #4', function (finish) {
 		var view = Ti.UI.createView({
 			backgroundColor: 'yellow',
 			layout: 'horizontal',
@@ -1747,7 +1747,7 @@ describe('Titanium.UI.Layout', function () {
 	// parent view should fit the size of the child, not Window
 	//
 	// FIXME Get working on iOS and Android. We can't rely on rect/size being valid in focus event!
-	((utilities.isIOS() || utilities.isAndroid()) ? it.skip : it)('TIMOB-23372 #6', function (finish) {
+	((utilities.isWindows() || utilities.isIOS() || utilities.isAndroid()) ? it.skip : it)('TIMOB-23372 #6', function (finish) {
 		var view = Ti.UI.createView({
 			backgroundColor: 'orange',
 			layout: 'vertical',
@@ -1796,7 +1796,7 @@ describe('Titanium.UI.Layout', function () {
 	// parent view should fit the size of the child, not Window
 	//
 	// FIXME Get working on iOS and Android. We can't rely on rect/size being valid in focus event!
-	((utilities.isIOS() || utilities.isAndroid()) ? it.skip : it)('TIMOB-23372 #7', function (finish) {
+	((utilities.isWindows() || utilities.isIOS() || utilities.isAndroid()) ? it.skip : it)('TIMOB-23372 #7', function (finish) {
 		var view = Ti.UI.createView({
 			backgroundColor: 'orange',
 			layout: 'composite',
@@ -1843,7 +1843,7 @@ describe('Titanium.UI.Layout', function () {
 	// left & right should just work for child view when parent is Window (composite)
 	//
 	// FIXME Get working on iOS and Android. We can't rely on rect/size being valid in focus event!
-	((utilities.isIOS() || utilities.isAndroid()) ? it.skip : it)('TIMOB-23372 #8', function (finish) {
+	((utilities.isWindows() || utilities.isIOS() || utilities.isAndroid()) ? it.skip : it)('TIMOB-23372 #8', function (finish) {
 		var label = Ti.UI.createLabel({
 			left: 10,
 			right: 10,
@@ -1877,7 +1877,7 @@ describe('Titanium.UI.Layout', function () {
 	// left & right should just work for child view when parent is Window (horizontal)
 	//
 	// FIXME Get working on iOS and Android. We can't rely on rect/size being valid in focus event!
-	((utilities.isIOS() || utilities.isAndroid()) ? it.skip : it)('TIMOB-23372 #9', function (finish) {
+	((utilities.isWindows() || utilities.isIOS() || utilities.isAndroid()) ? it.skip : it)('TIMOB-23372 #9', function (finish) {
 		var label = Ti.UI.createLabel({
 			left: 10,
 			right: 10,
@@ -1912,7 +1912,7 @@ describe('Titanium.UI.Layout', function () {
 	//
 	// FIXME Get working on iOS and Android. We can't rely on rect/size being valid in focus event!
 	// Windows crashes on label with left and right TIMOB-24848
-	(utilities.isWindows() || utilities.isIOS() || utilities.isAndroid() ? it.skip : it)('TIMOB-23372 #10', function (finish) {
+	((utilities.isWindows() || utilities.isIOS() || utilities.isAndroid()) ? it.skip : it)('TIMOB-23372 #10', function (finish) {
 		var label = Ti.UI.createLabel({
 			left: 10,
 			right: 10,
