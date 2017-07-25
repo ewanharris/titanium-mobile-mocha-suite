@@ -188,12 +188,27 @@ function killiOSSimulator(next) {
 	});
 }
 
-function runBuild(platform, next) {
+function runBuild(platform, target, deviceId, next) {
+
+	if (target === undefined) {
+		switch (platform) {
+			case 'android':
+				target = 'emulator';
+				break;
+			case 'ios':
+				target = 'simulator';
+				break;
+			case 'windows':
+				target = 'wp-emulator';
+				break;
+		}
+	}
+
 	var args = [
 			titanium, 'build',
 			'--project-dir', PROJECT_DIR,
 			'--platform', platform,
-			'--target', (platform === 'android') ? 'emulator' : 'simulator',
+			'--target', target,
 			'--log-level', 'info'
 		],
 		prc;
@@ -201,6 +216,12 @@ function runBuild(platform, next) {
 		args.push('--hide-error-controller');
 		killiOSSimulator();
 	}
+
+	if(deviceId) {
+		args.push('--C')
+		args.push(deviceId);
+	}
+
 	args.push('--no-prompt');
 	args.push('--no-colors');
 	prc = spawn('node', args);
@@ -352,11 +373,13 @@ function cleanNonGaSDKs(sdkPath, next) {
  * app for each platform with our mocha test suite. Outputs the results in a JUnit
  * test report, and holds onto the results in memory as a JSON object.
  *
- * @param  {String}   branch    branch/zip/url of SDK to install. If null/undefined, no SDK will be installed
- * @param  {Array[String]}   platforms [description]
- * @param  {Function} callback  [description]
+ * @param	{String}   			branch    	branch/zip/url of SDK to install. If null/undefined, no SDK will be installed
+ * @param	{(String|String[])}	platforms 	[description]
+ * @param	{String}   			target		Titanium target value to run the tests on
+ * @param	{String}			deviceId	Titanium device id target to run the tests on
+ * @param	{Function} 			callback  	[description]
  */
-function test(branch, platforms, callback) {
+function test(branch, platforms, target, deviceId, callback) {
 	var sdkPath,
 		tasks = [],
 		results = {};
@@ -397,7 +420,7 @@ function test(branch, platforms, callback) {
 	// run build for each platform, and spit out JUnit report
 	platforms.forEach(function (platform) {
 		tasks.push(function (next) {
-			runBuild(platform, function (err, result) {
+			runBuild(platform, target, deviceId, function (err, result) {
 				if (err) {
 					return next(err);
 				}
@@ -486,12 +509,24 @@ if (module.id === '.') {
 			.version(packageJson.version)
 			// TODO Allow choosing a URL or zipfile as SDK to install!
 			.option('-b, --branch [branchName]', 'Install a specific branch of the SDK to test with', 'master')
-			.option('-p, --platforms <platform1,platform2>', 'Run unit tests on the given platforms', /^(android(,ios)?)|(ios(,android)?)$/, 'android,ios')
+			.option('-p, --platforms <platform1,platform2>', 'Run unit tests on the given platforms', /^(android(,ios|,windows)?)|(ios(,android)?)|(windows(,android)?)$/, 'android,ios')
+			.option('-T, --target [target]', 'Titanium platform target to run the unit tests on. Only valid when there is a single platform provided')
+			.option('-C, --device-id [id]', 'Titanium device id to run the unit tests on. Only valid when there is a target provided')
 			.parse(process.argv);
 
 		platforms = program.platforms.split(',');
 
-		test(program.branch, platforms, function(err, results) {
+		if (platforms.length > 1 && program.target !== undefined) {
+			console.error('--target can only be used when there is a single platform provided');
+			process.exit(1);
+		}
+
+		if (program.deviceId && !program.target) {
+			console.error('--device-id can only be used when there is a target provided');
+			process.exit(1);
+		}
+
+		test(program.branch, platforms, program.target, program.deviceId, function(err, results) {
 			if (err) {
 				console.error(err.toString());
 				process.exit(1);
