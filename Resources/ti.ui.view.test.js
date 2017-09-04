@@ -130,11 +130,8 @@ describe('Titanium.UI.View', function () {
 	});
 
 	// FIXME Get working on iOS
-<<<<<<< HEAD
+
 	(((utilities.isIOS()) ? it.skip : it)('backgroundGradient', function (finish) {
-=======
-	((utilities.isIOS()) ? it.skip : it)('backgroundGradient', function (finish) {
->>>>>>> [TIMOB-24816] Updated to unskip all tests that do not crash the app
 		this.timeout(10000);
 
 		win = Ti.UI.createWindow({ backgroundColor: 'blue' });

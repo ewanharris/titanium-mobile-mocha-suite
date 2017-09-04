@@ -361,6 +361,7 @@ function cleanNonGaSDKs(sdkPath, next) {
 			if (thisSDKPath === sdkPath) { // skip SDK we just installed
 				return callback(null);
 			}
+			console.log('Removing ' + thisSDKPath);
 			wrench.rmdirRecursive(thisSDKPath, callback);
 		}, function(err) {
 			next(err);
@@ -379,35 +380,36 @@ function cleanNonGaSDKs(sdkPath, next) {
  * @param	{String}			deviceId	Titanium device id target to run the tests on
  * @param	{Function} 			callback  	[description]
  */
-function test(branch, platforms, target, deviceId, callback) {
+function test(branch, platforms, target, deviceId, skipSdkInstall, cleanup, callback) {
 	var sdkPath,
 		tasks = [],
 		results = {};
-
-	tasks.push(function (next) {
-		// install new SDK and delete old test app in parallel
-		async.parallel([
-			function (cb) {
-				if (branch) {
-					console.log('Installing SDK');
-					installSDK(branch, cb);
-				} else {
-					cb();
-				}
-			},
-			clearPreviousApp
-		], next);
-	});
-	// Record the SDK we just installed so we retain it when we clean up at end
-	tasks.push(function (next) {
-		getSDKInstallDir(function (err, installPath) {
-			if (err) {
-				return next(err);
-			}
-			sdkPath = installPath;
-			next();
+	if (!skipSdkInstall) {
+		tasks.push(function (next) {
+			// install new SDK and delete old test app in parallel
+			async.parallel([
+				function (cb) {
+					if (branch) {
+						console.log('Installing SDK');
+						installSDK(branch, cb);
+					} else {
+						cb();
+					}
+				},
+				clearPreviousApp
+			], next);
 		});
-	});
+		// Record the SDK we just installed so we retain it when we clean up at end
+		tasks.push(function (next) {
+			getSDKInstallDir(function (err, installPath) {
+				if (err) {
+					return next(err);
+				}
+				sdkPath = installPath;
+				next();
+			});
+		});
+	}
 
 	tasks.push(function (next) {
 		console.log('Generating project');
@@ -431,9 +433,11 @@ function test(branch, platforms, target, deviceId, callback) {
 	});
 
 	async.series(tasks, function (err) {
-		cleanNonGaSDKs(sdkPath, function (cleanupErr) {
-			callback(err || cleanupErr, results);
-		});
+		if (!skipSdkInstall || cleanup) {
+			cleanNonGaSDKs(sdkPath, function (cleanupErr) {
+				callback(err || cleanupErr, results);
+			});
+		}
 	});
 }
 
@@ -512,6 +516,8 @@ if (module.id === '.') {
 			.option('-p, --platforms <platform1,platform2>', 'Run unit tests on the given platforms', /^(android(,ios|,windows)?)|(ios(,android)?)|(windows(,android)?)$/, 'android,ios')
 			.option('-T, --target [target]', 'Titanium platform target to run the unit tests on. Only valid when there is a single platform provided')
 			.option('-C, --device-id [id]', 'Titanium device id to run the unit tests on. Only valid when there is a target provided')
+			.option('-s, --skip-sdk-install', 'Skip the SDK installation step')
+			.option('-c --cleanup', 'Cleanup SDKs')
 			.parse(process.argv);
 
 		platforms = program.platforms.split(',');
@@ -526,7 +532,7 @@ if (module.id === '.') {
 			process.exit(1);
 		}
 
-		test(program.branch, platforms, program.target, program.deviceId, function(err, results) {
+		test(program.branch, platforms, program.target, program.deviceId, program.skipSdkInstall, program.cleanup, function(err, results) {
 			if (err) {
 				console.error(err.toString());
 				process.exit(1);
