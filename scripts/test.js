@@ -426,8 +426,14 @@ function test(branch, platforms, target, deviceId, skipSdkInstall, cleanup, call
 				if (err) {
 					return next(err);
 				}
+				var prefix;
+				if (target) {
+					prefix = platform + '.' + target;
+				} else {
+					prefix = platform;
+				}
 				results[platform] = result;
-				outputJUnitXML(result, platform, next);
+				outputJUnitXML(result, prefix, next);
 			});
 		});
 	});
@@ -437,6 +443,8 @@ function test(branch, platforms, target, deviceId, skipSdkInstall, cleanup, call
 			cleanNonGaSDKs(sdkPath, function (cleanupErr) {
 				callback(err || cleanupErr, results);
 			});
+		} else {
+			callback(err, results)
 		}
 	});
 }
