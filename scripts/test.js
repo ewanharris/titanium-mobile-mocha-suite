@@ -6,14 +6,14 @@
 'use strict';
 
 const path = require('path'),
-	fs = require('fs'),
+	fs = require('fs-extra'),
 	async = require('async'),
-	wrench = require('wrench'),
 	colors = require('colors'), // eslint-disable-line no-unused-vars
 	ejs = require('ejs'),
 	StreamSplitter = require('stream-splitter'),
 	spawn = require('child_process').spawn, // eslint-disable-line security/detect-child-process
 	exec = require('child_process').exec, // eslint-disable-line security/detect-child-process
+	walkSync = require('walk-sync'),
 	titanium = path.join(__dirname, 'node_modules', 'titanium', 'bin', 'titanium'),
 	SOURCE_DIR = path.join(__dirname, '..'),
 	PROJECT_NAME = 'mocha',
@@ -23,7 +23,7 @@ const path = require('path'),
 function clearPreviousApp(next) {
 	// If the project already exists, wipe it
 	if (fs.existsSync(PROJECT_DIR)) {
-		wrench.rmdirSyncRecursive(PROJECT_DIR);
+		fs.removeSync(PROJECT_DIR);
 	}
 	next();
 }
@@ -145,8 +145,8 @@ function addTiAppProperties(next) {
 }
 
 function copyDir(src, dest) {
-	wrench.copyDirSyncRecursive(src, dest, {
-		forceDelete: true
+	fs.copySync(src, dest, {
+		overwrite: true
 	});
 }
 
@@ -337,14 +337,14 @@ function cleanNonGaSDKs(sdkPath, next) {
 				return callback(null);
 			}
 			console.log('Removing ' + thisSDKPath);
-			wrench.rmdirRecursive(thisSDKPath, callback);
+			fs.removeSync(thisSDKPath, callback);
 		}, function (err) {
 			next(err);
 		});
 	});
 }
 
-function cleanupModules(next) {
+function cleanupModulesAndPlugins(next) {
 	exec('node "' + titanium + '" config sdk.defaultInstallLocation -o json', function (error, stdout) {
 		let sdkDir = '';
 		if (error !== null) {
@@ -364,14 +364,14 @@ function cleanupModules(next) {
 		try {
 			if (fs.existsSync(moduleDir)) {
 				console.log('Removing ' + moduleDir);
-				wrench.rmdirSyncRecursive(moduleDir);
+				fs.removeSync(moduleDir);
 			} else {
 				console.log(moduleDir + ' doesnt exist');
 			}
 
 			if (fs.existsSync(pluginDir)) {
 				console.log('Removing ' + pluginDir);
-				wrench.rmdirSyncRecursive(pluginDir);
+				fs.removeSync(pluginDir);
 			} else {
 				console.log(pluginDir + ' doesnt exist');
 			}
@@ -382,6 +382,21 @@ function cleanupModules(next) {
 			return next(e);
 		}
 	});
+}
+
+/**
+ * Render out an app.js containg all the necessary requires
+ * @param  {Function} next Callback to call when done
+ */
+function renderAppJS(next) {
+	const resourcesDir = path.join(SOURCE_DIR, 'Resources');
+	const testFiles = walkSync(resourcesDir)
+		.filter(file => {
+			return /\w+\.test\.js$/i.test(file);
+		});
+	const appjs = ejs.render(fs.readFileSync(path.join(resourcesDir, 'app.js.ejs'), 'utf8'), { testFiles });
+	fs.writeFileSync(path.join(PROJECT_DIR, 'Resources', 'app.js'), appjs);
+	next();
 }
 
 /**
@@ -411,7 +426,7 @@ function test(branch, platforms, target, deviceId, skipSdkInstall, cleanup, call
 	// remove when running locally. That way no way can be angry at me
 	if (process.env.JENKINS || process.env.JENKINS_URL) {
 		tasks.push(function (next) {
-			cleanupModules(next);
+			cleanupModulesAndPlugins(next);
 		});
 	}
 
@@ -447,6 +462,7 @@ function test(branch, platforms, target, deviceId, skipSdkInstall, cleanup, call
 
 	tasks.push(copyMochaAssets);
 	tasks.push(addTiAppProperties);
+	tasks.push(renderAppJS);
 
 	// run build for each platform, and spit out JUnit report
 	const results = {};
@@ -479,7 +495,7 @@ function test(branch, platforms, target, deviceId, skipSdkInstall, cleanup, call
 	// remove when running locally. That way no way can be angry at me
 	if (process.env.JENKINS || process.env.JENKINS_URL) {
 		tasks.push(function (next) {
-			cleanupModules(next);
+			cleanupModulesAndPlugins(next);
 		});
 	}
 

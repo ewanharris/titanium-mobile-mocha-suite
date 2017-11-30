@@ -1,0 +1,121 @@
+/*
+ * Appcelerator Titanium Mobile
+ * Copyright (c) 2011-Present by Appcelerator, Inc. All Rights Reserved.
+ * Licensed under the terms of the Apache Public License
+ * Please see the LICENSE included with this distribution for details.
+ */
+'use strict';
+var utilities,
+	win,
+	$results = [],
+	failed = false;
+
+require('./ti-mocha');
+// I *think* we need to load mocha first before utilities...
+utilities = require('./utilities/utilities');
+win = Ti.UI.createWindow({
+	backgroundColor: 'yellow'
+});
+win.open();
+
+<% testFiles.forEach(function(testFile){ %>
+require('./<%- testFile.replace(/.js$/, '') %>');
+<% }); %>
+
+// ============================================================================
+
+// add a special mocha reporter that will time each test run using
+// our microsecond timer
+function $Reporter(runner) {
+	var started,
+		title;
+
+	runner.on('suite', function (suite) {
+		title = suite.title;
+	});
+
+	runner.on('test', function (test) {
+		Ti.API.info('!TEST_START: ' + test.title);
+		started = new Date().getTime();
+	});
+
+	runner.on('pending', function () {
+		// TODO Spit out something like !TEST_SKIP:  ?
+		started = new Date().getTime(); // reset timer. pending/skipped tests basically start and end immediately
+	});
+
+	// 'pending' hook for skipped tests? Does 'pending', then immediate 'test end'. No 'test' event
+
+	runner.on('fail', function (test, err) {
+		test.err = err;
+		failed = true;
+	});
+
+	runner.on('test end', function (test) {
+		var tdiff = new Date().getTime() - started,
+			err = test.err,
+			result = {
+				state: test.state || 'skipped',
+				duration: tdiff,
+				suite: title,
+				title: test.title,
+				error: err,
+				message: ''
+			},
+			message,
+			stack,
+			index,
+			msg,
+			stringified;
+
+		if (err) {
+			message = err.message || '';
+			stack = err.stack || message;
+			index = stack.indexOf(message) + message.length;
+			msg = stack.slice(0, index);
+			// uncaught
+			if (err.uncaught) {
+				msg = 'Uncaught ' + msg;
+			}
+			result.message = msg;
+			// indent stack trace without msg
+			stack = stack.slice(index ? index + 1 : index).replace(/^/gm, '  ');
+			result.stack = stack;
+		}
+
+		stringified = JSON.stringify(result);
+		stringified = stringified.replace(/\\n/g, '\\n')
+			.replace(/\\'/g, '\\\'')
+			.replace(/\\"/g, '\\"')
+			.replace(/\\&/g, '\\&')
+			.replace(/\\r/g, '\\r')
+			.replace(/\\t/g, '\\t')
+			.replace(/\\b/g, '\\b')
+			.replace(/\\f/g, '\\f');
+		// remove non-printable and other non-valid JSON chars
+		stringified = stringified.replace(/[\u0000-\u0019]+/g, '');
+		Ti.API.info('!TEST_END: ' + stringified);
+		$results.push(result);
+	});
+}
+
+mocha.setup({
+	reporter: $Reporter,
+	quiet: true
+});
+
+if (utilities.isWindows()) {
+	if (Ti.App.Windows.requestExtendedExecution) {
+		Ti.App.Windows.requestExtendedExecution();
+	}
+}
+// dump the output, which will get interpreted above in the logging code
+mocha.run(function () {
+	win.backgroundColor = failed ? 'red' : 'green';
+	Ti.API.info('!TEST_RESULTS_STOP!');
+	if (utilities.isWindows()) {
+		if (Ti.App.Windows.closeExtendedExecution) {
+			Ti.App.Windows.closeExtendedExecution();
+		}
+	}
+});
