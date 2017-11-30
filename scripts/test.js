@@ -390,11 +390,12 @@ function cleanupModulesAndPlugins(next) {
  */
 function renderAppJS(next) {
 	const resourcesDir = path.join(SOURCE_DIR, 'Resources');
-	const testFiles = walkSync(resourcesDir)
-		.filter(file => {
-			return /\w+\.test\.js$/i.test(file);
-		});
-	const appjs = ejs.render(fs.readFileSync(path.join(resourcesDir, 'app.js.ejs'), 'utf8'), { testFiles });
+	const blacklist = require(path.join(resourcesDir, 'blacklist.js'));
+	const testFileRegex = /\w+\.test\.js$/i;
+
+	const testFiles = walkSync(resourcesDir).filter(file => testFileRegex.test(file));
+
+	const appjs = ejs.render(fs.readFileSync(path.join(resourcesDir, 'app.js.ejs'), 'utf8'), { testFiles, blacklist: JSON.stringify(blacklist) });
 	fs.writeFileSync(path.join(PROJECT_DIR, 'Resources', 'app.js'), appjs);
 	next();
 }
