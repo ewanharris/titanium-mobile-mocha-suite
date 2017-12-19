@@ -18,21 +18,8 @@ win = Ti.UI.createWindow({
 });
 win.open();
 
-var blacklist = <%- blacklist %>;
-
-var platform;
-if (utilities.isAndroid()) {
-    platform = 'android';
-} else if (utilities.isIOS()) {
-    platform = 'ios';
-} else if (utilities.isWindows()) {
-    platform = 'windows';
-}
-
 <% testFiles.forEach(function(testFile){ %>
-if (blacklist[platform].indexOf('<%- testFile %>') === -1) {
-    require('./<%- testFile.replace(/.js$/, '') %>');
-}
+require('./<%- testFile.replace(/.js$/, '') %>');
 <% }); %>
 
 // ============================================================================

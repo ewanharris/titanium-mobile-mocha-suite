@@ -77,15 +77,15 @@ function getSDKInstallDir(next) {
 }
 
 /**
- * Runs `titanium create` to generate a project for the specific platforms.
- * @param  {string[]} platforms array of platform ids to create a project targeted for
+ * Runs `titanium create` to generate a project for the specific platform.
+ * @param  {string[]} platform array of platform ids to create a project targeted for
  * @param  {Function} next  callback function
  */
-function generateProject(platforms, next) {
+function generateProject(platform, next) {
 	// TODO Use fork since we're spawning off another node process
 	const prc = spawn('node', [ titanium, 'create', '--force',
 		'--type', 'app',
-		'--platforms', platforms.join(','),
+		'--platforms', platform,
 		'--name', PROJECT_NAME,
 		'--id', 'com.appcelerator.testApp.testing',
 		'--url', 'http://www.appcelerator.com',
@@ -388,16 +388,15 @@ function cleanupModulesAndPlugins(next) {
  * Render out an app.js containg all the necessary requires
  * @param  {Function} next Callback to call when done
  */
-function renderAppJS(next) {
+function renderAppJS(platform, next) {
 	const resourcesDir = path.join(SOURCE_DIR, 'Resources');
 	const blacklist = require(path.join(resourcesDir, 'blacklist.js'));
 	const testFileRegex = /\w+\.test\.js$/i;
 
-	const testFiles = walkSync(resourcesDir).filter(file => testFileRegex.test(file));
+	const testFiles = walkSync(resourcesDir).filter(file => testFileRegex.test(file) && !blacklist[platform].includes(file));
 
-	const appjs = ejs.render(fs.readFileSync(path.join(resourcesDir, 'app.js.ejs'), 'utf8'), { testFiles, blacklist: JSON.stringify(blacklist) });
-	fs.writeFileSync(path.join(PROJECT_DIR, 'Resources', 'app.js'), appjs);
-	next();
+	const appjs = ejs.render(fs.readFileSync(path.join(resourcesDir, 'app.js.ejs'), 'utf8'), { testFiles });
+	fs.writeFile(path.join(PROJECT_DIR, 'Resources', 'app.js'), appjs, next);
 }
 
 /**
@@ -406,14 +405,14 @@ function renderAppJS(next) {
  * test report, and holds onto the results in memory as a JSON object.
  *
  * @param	{String}   			branch    	branch/zip/url of SDK to install. If null/undefined, no SDK will be installed
- * @param	{(String|String[])}	platforms 	[description]
+ * @param	{(String|String[])}	platform 	[description]
  * @param	{String}   			target		Titanium target value to run the tests on
  * @param	{String}			deviceId	Titanium device id target to run the tests on
  * @param	{Boolean}			skipSdkInstall	Don't try to install an SDK from `branch`
  * @param	{Boolean}			cleanup	Delete all the non-GA SDKs when done? Defaults to true if we installed an SDK
  * @param	{Function} 			callback  	[description]
  */
-function test(branch, platforms, target, deviceId, skipSdkInstall, cleanup, callback) {
+function test(branch, platform, target, deviceId, skipSdkInstall, cleanup, callback) {
 	let sdkPath;
 	// if we're not skipping sdk install and haven't specific whether to clean up or not, default to cleaning up non-GA SDKs
 	if (!skipSdkInstall && cleanup === undefined) {
@@ -458,30 +457,30 @@ function test(branch, platforms, target, deviceId, skipSdkInstall, cleanup, call
 
 	tasks.push(function (next) {
 		console.log('Generating project');
-		generateProject(platforms, next);
+		generateProject(platform, next);
 	});
 
 	tasks.push(copyMochaAssets);
 	tasks.push(addTiAppProperties);
-	tasks.push(renderAppJS);
+	tasks.push(function (next) {
+		renderAppJS(platform, next);
+	});
 
 	// run build for each platform, and spit out JUnit report
 	const results = {};
-	platforms.forEach(function (platform) {
-		tasks.push(function (next) {
-			runBuild(platform, target, deviceId, function (err, result) {
-				if (err) {
-					return next(err);
-				}
-				let prefix;
-				if (target) {
-					prefix = platform + '.' + target;
-				} else {
-					prefix = platform;
-				}
-				results[prefix] = result;
-				outputJUnitXML(result, prefix, next);
-			});
+	tasks.push(function (next) {
+		runBuild(platform, target, deviceId, function (err, result) {
+			if (err) {
+				return next(err);
+			}
+			let prefix;
+			if (target) {
+				prefix = platform + '.' + target;
+			} else {
+				prefix = platform;
+			}
+			results[prefix] = result;
+			outputJUnitXML(result, prefix, next);
 		});
 	});
 
@@ -505,7 +504,7 @@ function test(branch, platforms, target, deviceId, skipSdkInstall, cleanup, call
 	});
 }
 
-function outputResults(results, next) {
+function outputResults(results) {
 	const suites = {};
 
 	// start
@@ -559,7 +558,6 @@ function outputResults(results, next) {
 
 	// Spit out overall stats: test count, failure count, pending count, pass count.
 	console.log('%d Total Tests: %d passed, %d failed, %d skipped.', (skipped + failures + passes), passes, failures, skipped);
-	next();
 }
 
 // public API
@@ -576,53 +574,36 @@ if (module.id === '.') {
 			.version(packageJson.version)
 			// TODO Allow choosing a URL or zipfile as SDK to install!
 			.option('-b, --branch [branchName]', 'Install a specific branch of the SDK to test with', 'master')
-			.option('-p, --platforms <platform1,platform2>', 'Run unit tests on the given platforms', /^(android(,ios|,windows)?)|(ios(,android)?)|(windows(,android)?)$/, 'android,ios')
+			.option('-p, --platform <platform>', 'Run unit tests on the given platform', /^(android|ios|windows)$/, 'ios')
 			.option('-T, --target [target]', 'Titanium platform target to run the unit tests on. Only valid when there is a single platform provided')
 			.option('-C, --device-id [id]', 'Titanium device id to run the unit tests on. Only valid when there is a target provided')
 			.option('-s, --skip-sdk-install', 'Skip the SDK installation step')
 			.option('-c, --cleanup', 'Cleanup non-GA SDKs. Default is true if we install an SDK')
 			.parse(process.argv);
 
-		const platforms = program.platforms.split(',');
-
-		if (platforms.length > 1 && program.target !== undefined) {
-			console.error('--target can only be used when there is a single platform provided');
-			process.exit(1);
-		}
-
 		if (program.deviceId && !program.target) {
 			console.error('--device-id can only be used when there is a target provided');
 			process.exit(1);
 		}
 
-		test(program.branch, platforms, program.target, program.deviceId, program.skipSdkInstall, program.cleanup, function (err, results) {
+		test(program.branch, program.platform, program.target, program.deviceId, program.skipSdkInstall, program.cleanup, function (err, results) {
 			if (err) {
 				console.error(err.toString());
 				process.exit(1);
 				return;
 			}
 
-			async.eachSeries(platforms, function (platform, next) {
-				let prefix;
-				if (program.target) {
-					prefix = platform + '.' + program.target;
-				} else {
-					prefix = platform;
-				}
-				console.log();
-				console.log('=====================================');
-				console.log(prefix.toUpperCase());
-				console.log('-------------------------------------');
-				outputResults(results[prefix].results, next);
-			}, function (err) {
-				if (err) {
-					console.error(err.toString());
-					process.exit(1);
-					return;
-				}
-
-				process.exit(0);
-			});
+			let prefix;
+			if (program.target) {
+				prefix = program.platform + '.' + program.target;
+			} else {
+				prefix = program.platform;
+			}
+			console.log();
+			console.log('=====================================');
+			console.log(prefix.toUpperCase());
+			console.log('-------------------------------------');
+			outputResults(results[prefix].results);
 		});
 	}());
 }
