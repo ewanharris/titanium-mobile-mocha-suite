@@ -8,15 +8,25 @@
 var utilities,
 	win,
 	$results = [],
-	failed = false;
+	failed = false,
+	should;;
 
 require('./ti-mocha');
 // I *think* we need to load mocha first before utilities...
 utilities = require('./utilities/utilities');
+should = require('./utilities/assertions');
 win = Ti.UI.createWindow({
 	backgroundColor: 'yellow'
 });
 win.open();
+
+// Must test global is available in first app.js explicitly!
+// (since app.js is treated slightly differently than required files on at least Android)
+describe('global', function () {
+	it('should be available as \'global\'', function () {
+		should(global).be.ok;
+	});
+});
 
 <% testFiles.forEach(function(testFile){ %>
 require('./<%- testFile.replace(/.js$/, '') %>');
