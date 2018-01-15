@@ -8,7 +8,7 @@
 /* global Ti */
 /* eslint no-unused-expressions: "off" */
 'use strict';
-var should = require('./utilities/assertions');
+var should = require('../utilities/assertions');
 
 describe.ios('Titanium.UI.iOS', function () {
 	// TIMOB-23542 test previewContext
@@ -18,7 +18,7 @@ describe.ios('Titanium.UI.iOS', function () {
 		should(Ti.UI.iOS.createPreviewContext).be.a.Function;
 		previewContext = Ti.UI.iOS.createPreviewContext({
 			preview: Ti.UI.createView({
-				backgroundColor: "red"
+				backgroundColor: 'red'
 			}),
 			contentHeight: 300
 		});

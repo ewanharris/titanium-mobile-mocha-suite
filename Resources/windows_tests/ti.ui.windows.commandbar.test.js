@@ -4,8 +4,8 @@
  * Licensed under the terms of the Apache Public License
  * Please see the LICENSE included with this distribution for details.
  */
-var should = require('./utilities/assertions'),
-	utilities = require('./utilities/utilities');
+var should = require('../utilities/assertions'),
+	utilities = require('../utilities/utilities');
 
 if (utilities.isWindows()) {
 	describe('Titanium.UI.Windows.CommandBar', function () {
@@ -51,7 +51,6 @@ if (utilities.isWindows()) {
 
 			finish();
 		});
-
 
 		it('AppBarSeparator', function (finish) {
 			var separator = Ti.UI.Windows.createAppBarSeparator();

@@ -161,7 +161,8 @@ function isBlackListed (filePath, blacklist) {
 	if (blacklist.includes(filePath)) {
 		return true;
 	}
-
+	// We should probably uses something like globs to do this better, at the
+	// moment it is incredibly error prone
 	const parts = filePath.split(path.separator);
 	for (const part of parts) {
 		if (blacklist.includes(part)) {

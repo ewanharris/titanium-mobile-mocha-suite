@@ -9,7 +9,7 @@
 /* eslint no-unused-expressions: "off" */
 'use strict';
 
-var should = require('./utilities/assertions');
+var should = require('../utilities/assertions');
 
 describe.android('Titanium.UI.Android', function () {
 	it('#createDrawerLayout', function () {
