@@ -32,8 +32,7 @@
     "ejs": "~2.2.4",
     "fs-extra": "^4.0.2",
     "stream-splitter": "~0.3.2",
-    "titanium": "*",
-    "walk-sync": "^0.3.2"
+    "titanium": "*"
   },
   "engines": {
     "node": ">=4.0"

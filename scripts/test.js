@@ -13,9 +13,9 @@ const path = require('path'),
 	StreamSplitter = require('stream-splitter'),
 	spawn = require('child_process').spawn, // eslint-disable-line security/detect-child-process
 	exec = require('child_process').exec, // eslint-disable-line security/detect-child-process
-	walkSync = require('walk-sync'),
 	titanium = path.join(__dirname, 'node_modules', 'titanium', 'bin', 'titanium'),
 	SOURCE_DIR = path.join(__dirname, '..'),
+	RESOURCES_DIR = path.join(SOURCE_DIR, 'Resources'),
 	PROJECT_NAME = 'mocha',
 	PROJECT_DIR = path.join(__dirname, PROJECT_NAME),
 	JUNIT_TEMPLATE = path.join(__dirname, 'junit.xml.ejs');
@@ -151,20 +151,52 @@ function addTiAppProperties(next) {
 	next();
 }
 
-function copyDir(src, dest) {
-	fs.copySync(src, dest, {
-		overwrite: true
-	});
+/**
+ * Determine if a file path is blacklisted, either by full name or folder name
+ * @param {String} filePath The relative path to the file
+ * @param {Array} blacklist Array of blacklisted files/folders
+ */
+function isBlackListed (filePath, blacklist) {
+
+	if (blacklist.includes(filePath)) {
+		return true;
+	}
+
+	const parts = filePath.split(path.separator);
+	for (const part of parts) {
+		if (blacklist.includes(part)) {
+			return true;
+		}
+	}
+	return false;
 }
 
-function copyMochaAssets(next) {
-	copyDir(path.join(SOURCE_DIR, 'Resources'), path.join(PROJECT_DIR, 'Resources'));
+function copyMochaAssetsAndRenderAppJs(platform, next) {
+
+	const blacklist = require(path.join(RESOURCES_DIR, 'blacklist.js'));
+	const testFileRegex = /\w+\.test\.js$/i;
+
+	const testFiles = [];
+	fs.copySync(RESOURCES_DIR, path.join(PROJECT_DIR, 'Resources'), {
+		filter: (src) => {
+			src = path.relative(RESOURCES_DIR, src);
+			if (!isBlackListed(src, blacklist[platform])) {
+				testFileRegex.test(src) && testFiles.push(src);
+				return true;
+			} else {
+				console.log(`Excluding ${src}`);
+			}
+		}
+	});
 	// copy modules so we can test those too
-	copyDir(path.join(SOURCE_DIR, 'modules'), path.join(PROJECT_DIR, 'modules'));
+	fs.copySync(path.join(SOURCE_DIR, 'modules'), path.join(PROJECT_DIR, 'modules'));
 	// copy plugins so we can test those too
-	copyDir(path.join(SOURCE_DIR, 'plugins'), path.join(PROJECT_DIR, 'plugins'));
+	fs.copySync(path.join(SOURCE_DIR, 'plugins'), path.join(PROJECT_DIR, 'plugins'));
 	// copy i18n so we can test those too
-	copyDir(path.join(SOURCE_DIR, 'i18n'), path.join(PROJECT_DIR, 'i18n'));
+	fs.copySync(path.join(SOURCE_DIR, 'i18n'), path.join(PROJECT_DIR, 'i18n'));
+
+	const appjs = ejs.render(fs.readFileSync(path.join(RESOURCES_DIR, 'app.js.ejs'), 'utf8'), { testFiles });
+	fs.writeFileSync(path.join(PROJECT_DIR, 'Resources', 'app.js'), appjs);
 	next();
 }
 
@@ -392,21 +424,6 @@ function cleanupModulesAndPlugins(next) {
 }
 
 /**
- * Render out an app.js containg all the necessary requires
- * @param  {Function} next Callback to call when done
- */
-function renderAppJS(platform, next) {
-	const resourcesDir = path.join(SOURCE_DIR, 'Resources');
-	const blacklist = require(path.join(resourcesDir, 'blacklist.js'));
-	const testFileRegex = /\w+\.test\.js$/i;
-
-	const testFiles = walkSync(resourcesDir).filter(file => testFileRegex.test(file) && !blacklist[platform].includes(file));
-
-	const appjs = ejs.render(fs.readFileSync(path.join(resourcesDir, 'app.js.ejs'), 'utf8'), { testFiles });
-	fs.writeFile(path.join(PROJECT_DIR, 'Resources', 'app.js'), appjs, next);
-}
-
-/**
  * Installs a Titanium SDK to test against, generates a test app, then runs the
  * app for each platform with our mocha test suite. Outputs the results in a JUnit
  * test report, and holds onto the results in memory as a JSON object.
@@ -467,11 +484,11 @@ function test(branch, platform, target, deviceId, skipSdkInstall, cleanup, callb
 		generateProject(platform, next);
 	});
 
-	tasks.push(copyMochaAssets);
-	tasks.push(addTiAppProperties);
 	tasks.push(function (next) {
-		renderAppJS(platform, next);
+		copyMochaAssetsAndRenderAppJs(platform, next);
 	});
+
+	tasks.push(addTiAppProperties);
 
 	// run build for each platform, and spit out JUnit report
 	const results = {};
