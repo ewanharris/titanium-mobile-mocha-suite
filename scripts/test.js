@@ -182,7 +182,7 @@ function copyMochaAssetsAndRenderAppJs(platform, next) {
 		filter: (src) => {
 			src = path.relative(RESOURCES_DIR, src);
 			if (!isBlackListed(src, blacklist[platform])) {
-				testFileRegex.test(src) && testFiles.push(src);
+				testFileRegex.test(src) && testFiles.push(src.replace(/\\/, '/'));
 				return true;
 			} else {
 				console.log(`Excluding ${src}`);
