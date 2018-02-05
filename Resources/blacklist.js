@@ -7,15 +7,9 @@
 
 module.exports = {
 	'android': [
-		'ios_tests',
-		'windows_tests',
 	],
 	'ios':[
-		'android_tests',
-		'windows_tests',
 	],
 	'windows': [
-		'android_tests',
-		'ios_tests'
 	]
 };

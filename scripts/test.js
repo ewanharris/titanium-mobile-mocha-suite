@@ -13,6 +13,7 @@ const path = require('path'),
 	StreamSplitter = require('stream-splitter'),
 	spawn = require('child_process').spawn, // eslint-disable-line security/detect-child-process
 	exec = require('child_process').exec, // eslint-disable-line security/detect-child-process
+	glob = require('glob'),
 	titanium = path.join(__dirname, 'node_modules', 'titanium', 'bin', 'titanium'),
 	SOURCE_DIR = path.join(__dirname, '..'),
 	RESOURCES_DIR = path.join(SOURCE_DIR, 'Resources'),
@@ -151,54 +152,29 @@ function addTiAppProperties(next) {
 	next();
 }
 
-/**
- * Determine if a file path is blacklisted, either by full name or folder name
- * @param {String} filePath The relative path to the file
- * @param {Array} blacklist Array of blacklisted files/folders
- */
-function isBlackListed (filePath, blacklist) {
-
-	if (blacklist.includes(filePath)) {
-		return true;
-	}
-	// We should probably uses something like globs to do this better, at the
-	// moment it is incredibly error prone
-	const parts = filePath.split(path.separator);
-	for (const part of parts) {
-		if (blacklist.includes(part)) {
-			return true;
-		}
-	}
-	return false;
-}
-
 function copyMochaAssetsAndRenderAppJs(platform, next) {
 
 	const blacklist = require(path.join(RESOURCES_DIR, 'blacklist.js'));
-	const testFileRegex = /\w+\.test\.js$/i;
-
-	const testFiles = [];
-	fs.copySync(RESOURCES_DIR, path.join(PROJECT_DIR, 'Resources'), {
-		filter: (src) => {
-			src = path.relative(RESOURCES_DIR, src);
-			if (!isBlackListed(src, blacklist[platform])) {
-				testFileRegex.test(src) && testFiles.push(src.replace(/\\/, '/'));
-				return true;
-			} else {
-				console.log(`Excluding ${src}`);
-			}
-		}
-	});
+	fs.copySync(RESOURCES_DIR, path.join(PROJECT_DIR, 'Resources'));
 	// copy modules so we can test those too
 	fs.copySync(path.join(SOURCE_DIR, 'modules'), path.join(PROJECT_DIR, 'modules'));
 	// copy plugins so we can test those too
 	fs.copySync(path.join(SOURCE_DIR, 'plugins'), path.join(PROJECT_DIR, 'plugins'));
 	// copy i18n so we can test those too
 	fs.copySync(path.join(SOURCE_DIR, 'i18n'), path.join(PROJECT_DIR, 'i18n'));
-
+	const testFiles = [];
+	const globs = [
+		'*.test.js',
+		`${platform}/*.test.js`
+	].concat(...blacklist[platform]);
+	globs.forEach(globSyntax => {
+		const files = glob.sync(globSyntax, { cwd: RESOURCES_DIR });
+		for (const file of files) {
+			testFiles.push(path.basename(file));
+		}
+	});
 	const appjs = ejs.render(fs.readFileSync(path.join(RESOURCES_DIR, 'app.js.ejs'), 'utf8'), { testFiles });
-	fs.writeFileSync(path.join(PROJECT_DIR, 'Resources', 'app.js'), appjs);
-	next();
+	fs.writeFile(path.join(PROJECT_DIR, 'Resources', 'app.js'), appjs, next);
 }
 
 function killiOSSimulator(next) {
@@ -377,7 +353,7 @@ function cleanNonGaSDKs(sdkPath, next) {
 				return callback(null);
 			}
 			console.log('Removing ' + thisSDKPath);
-			fs.removeSync(thisSDKPath, callback);
+			fs.remove(thisSDKPath, callback);
 		}, function (err) {
 			next(err);
 		});
@@ -618,11 +594,9 @@ if (module.id === '.') {
 				return;
 			}
 
-			let prefix;
+			let prefix = program.platform;
 			if (program.target) {
-				prefix = program.platform + '.' + program.target;
-			} else {
-				prefix = program.platform;
+				prefix += '.' + program.target;
 			}
 			console.log();
 			console.log('=====================================');

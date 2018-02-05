@@ -8,7 +8,7 @@
 /* global Ti */
 /* eslint no-unused-expressions: "off" */
 'use strict';
-var should = require('../utilities/assertions');
+var should = require('./utilities/assertions');
 
 describe.windows('Titanium.App.Windows.BackgroundService', function () {
 
